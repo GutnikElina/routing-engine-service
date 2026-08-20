@@ -2,6 +2,8 @@ package com.logistics.routing.adapter.out.persistence;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -16,7 +18,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -37,37 +39,38 @@ public class RouteOrderEntity {
     private String orderNumber;
 
     @Column(name = "status", nullable = false, length = 32)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private RouteOrderStatus status;
 
-    @Column(name = "cargo_weight_kg")
-    private Double cargoWeightKg;
+    @Column(name = "cargo_weight_kg", precision = 12, scale = 3)
+    private BigDecimal cargoWeightKg;
 
-    @Column(name = "cargo_volume_m3")
-    private Double cargoVolumeM3;
+    @Column(name = "cargo_volume_m3", precision = 12, scale = 3)
+    private BigDecimal cargoVolumeM3;
 
     @Column(name = "adr_class", length = 16)
-    private String adrClass;
+    private AdrClass adrClass;
 
-    @Column(name = "temperature_min")
-    private Double temperatureMin;
+    @Column(name = "temperature_min", precision = 5, scale = 2)
+    private BigDecimal temperatureMin;
 
-    @Column(name = "temperature_max")
-    private Double temperatureMax;
+    @Column(name = "temperature_max", precision = 5, scale = 2)
+    private BigDecimal temperatureMax;
 
-    @Column(name = "total_distance_km")
-    private Double totalDistanceKm;
+    @Column(name = "total_distance_km", precision = 12, scale = 3)
+    private BigDecimal totalDistanceKm;
 
     @Column(name = "total_cost", precision = 12, scale = 2)
     private BigDecimal totalCost;
 
     @Column(name = "eta")
-    private OffsetDateTime eta;
+    private Instant eta;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @CreationTimestamp
-    private OffsetDateTime createdAt;
+    private Instant createdAt;
 
     @Column(name = "updated_at", nullable = false)
     @UpdateTimestamp
-    private OffsetDateTime updatedAt;
+    private Instant updatedAt;
 }

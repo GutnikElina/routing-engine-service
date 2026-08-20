@@ -19,6 +19,7 @@
 
     <properties>
         <java.version>21</java.version>
+        <datasource-proxy.version>1.9.2</datasource-proxy.version>
     </properties>
 
     <dependencies>
@@ -50,6 +51,12 @@
         <dependency>
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-spatial</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.gavlyukovskiy</groupId>
+            <artifactId>datasource-proxy-spring-boot-starter</artifactId>
+            <version>${datasource-proxy.version}</version>
+            <scope>runtime</scope>
         </dependency>
         <!-- TODO: Internal starter to be integrated when available -->
         <!--

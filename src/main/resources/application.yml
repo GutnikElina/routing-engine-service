@@ -2,9 +2,9 @@ spring:
   application:
     name: routing-engine-service
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/routing?currentSchema=routing}
-    username: ${SPRING_DATASOURCE_USERNAME:postgres}
-    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/routing?currentSchema=routing}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
     hikari:
       pool-name: routing-engine-hikari
       maximum-pool-size: 10
@@ -31,5 +31,14 @@ spring:
     locations: classpath:db/migration
     schemas: routing
 
+datasource-proxy:
+  logging: slf4j
+  query:
+    enable-logging: false
+    log-level: debug
+  slow-query:
+    enable-logging: false
+    threshold: 5000
+
 server:
-  port: 8082
+  port: ${SERVER_PORT:8082}

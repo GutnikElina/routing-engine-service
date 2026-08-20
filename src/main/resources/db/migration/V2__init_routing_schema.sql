@@ -5,12 +5,12 @@ CREATE TABLE route_orders (
     id UUID PRIMARY KEY,
     order_number VARCHAR(64) NOT NULL UNIQUE,
     status VARCHAR(32) NOT NULL CHECK (status IN ('CREATED', 'PLANNING', 'PLANNED', 'IN_TRANSIT', 'COMPLETED', 'CLOSED', 'CANCELLED')),
-    cargo_weight_kg DOUBLE PRECISION,
-    cargo_volume_m3 DOUBLE PRECISION,
+    cargo_weight_kg NUMERIC(12, 3),
+    cargo_volume_m3 NUMERIC(12, 3),
     adr_class VARCHAR(16) CHECK (adr_class IN ('1', '2', '3', '4.1', '4.2', '4.3', '5.1', '5.2', '6.1', '6.2', '7', '8', '9', 'X')),
-    temperature_min DOUBLE PRECISION,
-    temperature_max DOUBLE PRECISION,
-    total_distance_km DOUBLE PRECISION,
+    temperature_min NUMERIC(5, 2),
+    temperature_max NUMERIC(5, 2),
+    total_distance_km NUMERIC(12, 3),
     total_cost DECIMAL(12, 2),
     eta TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -40,7 +40,8 @@ CREATE TABLE waypoints (
     address VARCHAR(255),
     time_window_start TIMESTAMP WITH TIME ZONE,
     time_window_end TIMESTAMP WITH TIME ZONE,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE outbox_events (

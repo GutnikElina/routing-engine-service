@@ -1,0 +1,17 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+datasource-proxy:
+  query:
+    enable-logging: true
+    log-level: debug
+  slow-query:
+    enable-logging: true
+    log-level: warn
+    threshold: 3000
+
+logging:
+  level:
+    net.ttddyy.dsproxy.listener.logging: debug
