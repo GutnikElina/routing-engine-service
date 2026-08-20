@@ -2,22 +2,34 @@ spring:
   application:
     name: routing-engine-service
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/routing}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/routing?currentSchema=routing}
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
     password: ${SPRING_DATASOURCE_PASSWORD:postgres}
-    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: routing-engine-hikari
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      auto-commit: false
   jpa:
     hibernate:
       ddl-auto: validate
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: routing
+        jdbc:
+          time_zone: UTC
+          batch_size: 25
+        order_inserts: true
+        order_updates: true
         format_sql: true
+    open-in-view: false
     show-sql: false
   flyway:
     enabled: true
     baseline-on-migrate: true
     locations: classpath:db/migration
+    schemas: routing
 
 server:
   port: 8082
