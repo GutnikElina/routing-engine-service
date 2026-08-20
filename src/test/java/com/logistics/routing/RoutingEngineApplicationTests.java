@@ -11,6 +11,7 @@ import org.springframework.test.context.TestPropertySource;
     "spring.datasource.username=sa",
     "spring.datasource.password=",
     "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect",
+    "spring.jpa.hibernate.ddl-auto=none",
     "spring.flyway.enabled=false"
 })
 class RoutingEngineApplicationTests {
