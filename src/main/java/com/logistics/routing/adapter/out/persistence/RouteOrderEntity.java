@@ -1,7 +1,20 @@
-package com.logistics.routing.domain;
+package com.logistics.routing.adapter.out.persistence;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.UuidGenerator;
+
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -16,6 +29,8 @@ import java.util.UUID;
 public class RouteOrderEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @UuidGenerator(style = UuidGenerator.Style.RANDOM)
     private UUID id;
 
     @Column(name = "order_number", nullable = false, unique = true, length = 64)
@@ -49,22 +64,10 @@ public class RouteOrderEntity {
     private OffsetDateTime eta;
 
     @Column(name = "created_at", nullable = false, updatable = false)
+    @CreationTimestamp
     private OffsetDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
+    @UpdateTimestamp
     private OffsetDateTime updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        if (id == null) {
-            id = UUID.randomUUID();
-        }
-        createdAt = OffsetDateTime.now();
-        updatedAt = OffsetDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = OffsetDateTime.now();
-    }
 }
