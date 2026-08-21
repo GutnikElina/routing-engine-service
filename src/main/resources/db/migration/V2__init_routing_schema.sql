@@ -4,7 +4,7 @@ SET search_path TO routing, public;
 CREATE TABLE route_orders (
     id UUID PRIMARY KEY,
     order_number VARCHAR(64) NOT NULL UNIQUE,
-    status VARCHAR(32) NOT NULL CHECK (status IN ('CREATED', 'PLANNING', 'PLANNED', 'IN_TRANSIT', 'COMPLETED', 'CLOSED', 'CANCELLED')),
+    status VARCHAR(32) NOT NULL CHECK (status IN ('DRAFT', 'PLANNED', 'READY_TO_START', 'BLOCKED', 'IN_TRANSIT', 'NEEDS_REPLANNING', 'DELIVERED', 'FAILED', 'CLOSED')),
     cargo_weight_kg NUMERIC(12, 3),
     cargo_volume_m3 NUMERIC(12, 3),
     adr_class VARCHAR(16) CHECK (adr_class IN ('1', '2', '3', '4.1', '4.2', '4.3', '5.1', '5.2', '6.1', '6.2', '7', '8', '9', 'X')),
@@ -33,8 +33,8 @@ CREATE TABLE route_segments (
 
 CREATE TABLE waypoints (
     id UUID PRIMARY KEY,
-    route_order_id UUID NOT NULL REFERENCES route_orders(id) ON DELETE CASCADE,
-    waypoint_type VARCHAR(32) NOT NULL CHECK (waypoint_type IN ('PICKUP', 'DELIVERY', 'TRANSFER', 'WAREHOUSE')),
+    route_segment_id UUID NOT NULL REFERENCES route_segments(id) ON DELETE CASCADE,
+    waypoint_type VARCHAR(32) NOT NULL CHECK (waypoint_type IN ('ORIGIN', 'DESTINATION', 'CROSS_DOCK', 'CUSTOMS')),
     sequence_number INT NOT NULL,
     location GEOMETRY(Point, 4326) NOT NULL,
     address VARCHAR(255),
@@ -56,7 +56,7 @@ CREATE TABLE outbox_events (
 );
 
 CREATE INDEX idx_route_segments_route_order ON route_segments(route_order_id);
-CREATE INDEX idx_waypoints_route_order ON waypoints(route_order_id);
+CREATE INDEX idx_waypoints_route_segment ON waypoints(route_segment_id);
 CREATE INDEX idx_outbox_events_pending ON outbox_events(status, created_at) WHERE status = 'PENDING';
 
 CREATE INDEX idx_route_segments_geometry ON route_segments USING GIST (path_geometry);

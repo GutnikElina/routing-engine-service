@@ -1,11 +1,13 @@
 package com.logistics.routing.adapter.out.persistence;
 
 public enum RouteOrderStatus {
-    CREATED,
-    PLANNING,
+    DRAFT,
     PLANNED,
+    READY_TO_START,
+    BLOCKED,
     IN_TRANSIT,
-    COMPLETED,
-    CLOSED,
-    CANCELLED
+    NEEDS_REPLANNING,
+    DELIVERED,
+    FAILED,
+    CLOSED
 }
