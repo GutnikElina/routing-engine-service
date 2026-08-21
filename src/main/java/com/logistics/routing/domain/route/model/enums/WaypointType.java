@@ -1,4 +1,4 @@
-package com.logistics.routing.domain.route;
+package com.logistics.routing.domain.route.model.enums;
 
 public enum WaypointType {
     PICKUP,

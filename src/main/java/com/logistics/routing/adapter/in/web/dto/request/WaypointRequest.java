@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.Instant;
 
-import com.logistics.routing.domain.route.WaypointType;
+import com.logistics.routing.domain.route.model.enums.WaypointType;
 
 public record WaypointRequest(
     @NotNull
