@@ -3,7 +3,7 @@ package com.logistics.routing.application.route.create;
 import java.math.BigDecimal;
 import java.time.Instant;
 
-import com.logistics.routing.domain.route.WaypointType;
+import com.logistics.routing.domain.route.model.enums.WaypointType;
 
 public record WaypointCommand(
     WaypointType type,
