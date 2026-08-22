@@ -1,4 +1,4 @@
-package com.logistics.routing.adapter.out.persistence;
+package com.logistics.routing.adapter.out.persistence.route;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,6 +14,8 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
+
+import com.logistics.routing.domain.route.model.enums.AdrClass;
 
 import java.math.BigDecimal;
 import java.time.Instant;
