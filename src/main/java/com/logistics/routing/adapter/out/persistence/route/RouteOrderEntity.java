@@ -5,6 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,9 +18,12 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import com.logistics.routing.domain.route.model.enums.AdrClass;
+import com.logistics.routing.domain.route.model.enums.RouteOrderStatus;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -72,4 +77,13 @@ public class RouteOrderEntity {
     @Column(name = "updated_at", nullable = false)
     @UpdateTimestamp
     private Instant updatedAt;
+
+    @OneToMany(mappedBy = "routeOrder", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<WaypointEntity> waypoints = new ArrayList<>();
+
+    public void addWaypoint(WaypointEntity waypoint) {
+        waypoints.add(waypoint);
+        waypoint.setRouteOrder(this);
+    }
 }
