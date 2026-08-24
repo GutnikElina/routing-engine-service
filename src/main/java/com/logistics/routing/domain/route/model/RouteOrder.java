@@ -4,6 +4,7 @@ import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -112,24 +113,19 @@ public class RouteOrder {
             }
         }
 
-        boolean hasPickup = waypoints.stream()
-                .anyMatch(waypoint -> waypoint.getType() == WaypointType.PICKUP);
-        boolean hasDelivery = waypoints.stream()
-                .anyMatch(waypoint -> waypoint.getType() == WaypointType.DELIVERY);
+        List<Waypoint> sortedWaypoints = waypoints.stream()
+                .sorted(Comparator.comparingInt(Waypoint::getSequenceNumber))
+                .toList();
 
-        if (!hasPickup || !hasDelivery) {
-            throw new InvalidRouteDraftException(
-                    "a route draft must contain at least one PICKUP and one DELIVERY"
-            );
+        Waypoint firstWaypoint = sortedWaypoints.getFirst();
+        Waypoint lastWaypoint = sortedWaypoints.getLast();
+
+        if (firstWaypoint.getType() != WaypointType.ORIGIN) {
+            throw new InvalidRouteDraftException("the first waypoint must be an ORIGIN");
         }
 
-        if (waypoints.getFirst().getType() != WaypointType.PICKUP) {
-            throw new InvalidRouteDraftException("the first waypoint must be a PICKUP");
-        }
-
-        if (waypoints.getLast().getType() != WaypointType.DELIVERY) {
-            throw new InvalidRouteDraftException("the last waypoint must be a DELIVERY");
+        if (lastWaypoint.getType() != WaypointType.DESTINATION) {
+            throw new InvalidRouteDraftException("the last waypoint must be a DESTINATION");
         }
     }
-
 }

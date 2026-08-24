@@ -88,4 +88,9 @@ public class RouteOrderEntity {
         waypoints.add(waypoint);
         waypoint.setRouteOrder(this);
     }
+
+    public void removeWaypoint(WaypointEntity waypoint) {
+        waypoints.remove(waypoint);
+        waypoint.setRouteOrder(null);
+    }
 }

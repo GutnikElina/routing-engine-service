@@ -6,11 +6,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice
-public class RouteExceptionHandler extends ResponseEntityExceptionHandler {
+public class RouteExceptionHandler {
 
     @ExceptionHandler(InvalidRouteDraftException.class)
     public ProblemDetail handleInvalidRouteDraft(
@@ -24,6 +26,27 @@ public class RouteExceptionHandler extends ResponseEntityExceptionHandler {
         );
         problemDetail.setTitle("Invalid route draft");
         return problemDetail;
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ProblemDetail handleValidation(MethodArgumentNotValidException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                "Request validation failed"
+        );
+        problem.setTitle("Invalid request");
+
+        List<Map<String, String>> errors = exception.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(error -> Map.of(
+                        "field", error.getField(),
+                        "message", error.getDefaultMessage()
+                ))
+                .toList();
+
+        problem.setProperty("errors", errors);
+        return problem;
     }
 
     @ExceptionHandler(Exception.class)
