@@ -4,9 +4,7 @@ import com.logistics.routing.adapter.out.messaging.kafka.KafkaOutboxEventProduce
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -24,15 +22,14 @@ public class OutboxEventPublisher {
     private final Clock clock;
 
     @Value("${outbox.publisher.batch-size}")
-    private final int batchSize;
+    private int batchSize;
 
     @Scheduled(fixedDelayString = "${outbox.publisher.fixed-delay}")
-    @SchedulerLock(name = "outbox-event-publisher")
     @Transactional
     public void publishPendingEvents() {
-        List<OutboxEventEntity> events = outboxEventRepository.findByStatusOrderByCreatedAtAsc(
-                OutboxEventStatus.PENDING,
-                PageRequest.of(0, batchSize)
+        List<OutboxEventEntity> events = outboxEventRepository.lockNextBatch(
+                OutboxEventStatus.PENDING.name(),
+                batchSize
         );
 
         for (OutboxEventEntity event : events) {
