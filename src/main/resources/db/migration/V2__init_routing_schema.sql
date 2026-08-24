@@ -28,12 +28,13 @@ CREATE TABLE route_segments (
     actual_end_time TIMESTAMP WITH TIME ZONE,
     path_geometry GEOMETRY(LineString, 4326),
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (id, route_order_id)
 );
 
 CREATE TABLE waypoints (
     id UUID PRIMARY KEY,
-    route_segment_id UUID NOT NULL REFERENCES route_segments(id) ON DELETE CASCADE,
+    route_order_id UUID NOT NULL REFERENCES route_orders(id) ON DELETE CASCADE,
     waypoint_type VARCHAR(32) NOT NULL CHECK (waypoint_type IN ('ORIGIN', 'DESTINATION', 'CROSS_DOCK', 'CUSTOMS')),
     sequence_number INT NOT NULL,
     location GEOMETRY(Point, 4326) NOT NULL,
@@ -41,7 +42,23 @@ CREATE TABLE waypoints (
     time_window_start TIMESTAMP WITH TIME ZONE,
     time_window_end TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (id, route_order_id),
+    UNIQUE (route_order_id, sequence_number)
+);
+
+CREATE TABLE route_segment_waypoints (
+    route_segment_id UUID NOT NULL,
+    route_order_id UUID NOT NULL,
+    waypoint_id UUID NOT NULL,
+    sequence_number INT NOT NULL,
+
+    PRIMARY KEY (route_segment_id, waypoint_id),
+    UNIQUE (route_segment_id, sequence_number),
+    FOREIGN KEY (route_segment_id, route_order_id)
+        REFERENCES route_segments(id, route_order_id) ON DELETE CASCADE,
+    FOREIGN KEY (waypoint_id, route_order_id)
+        REFERENCES waypoints(id, route_order_id) ON DELETE CASCADE
 );
 
 CREATE TABLE outbox_events (
@@ -56,7 +73,8 @@ CREATE TABLE outbox_events (
 );
 
 CREATE INDEX idx_route_segments_route_order ON route_segments(route_order_id);
-CREATE INDEX idx_waypoints_route_segment ON waypoints(route_segment_id);
+CREATE INDEX idx_waypoints_route_order ON waypoints(route_order_id);
+CREATE INDEX idx_rsw_waypoint ON route_segment_waypoints(waypoint_id);
 CREATE INDEX idx_outbox_events_pending ON outbox_events(status, created_at) WHERE status = 'PENDING';
 
 CREATE INDEX idx_route_segments_geometry ON route_segments USING GIST (path_geometry);
