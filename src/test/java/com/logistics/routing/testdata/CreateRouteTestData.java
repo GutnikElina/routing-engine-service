@@ -12,9 +12,9 @@ import java.util.List;
 @UtilityClass
 public class CreateRouteTestData {
 
-    public final String ORDER_NUMBER = "ORDER-123";
+    public static final String ORDER_NUMBER = "ORDER-123";
 
-    public CreateRouteCommand validCreateRouteCommand() {
+    public static CreateRouteCommand validCreateRouteCommand() {
         return new CreateRouteCommand(
                 ORDER_NUMBER,
                 new CargoCommand(
@@ -25,24 +25,59 @@ public class CreateRouteTestData {
                         new BigDecimal("20.00")
                 ),
                 List.of(
-                        waypoint(WaypointType.PICKUP, 1),
-                        waypoint(WaypointType.DELIVERY, 2)
+                        waypoint(WaypointType.ORIGIN, 1),
+                        waypoint(WaypointType.DESTINATION, 2)
                 )
         );
     }
 
-    public CreateRouteCommand commandWithInvalidFirstWaypoint() {
+    public static CreateRouteCommand commandWithInvalidFirstWaypoint() {
         return new CreateRouteCommand(
                 ORDER_NUMBER,
                 validCreateRouteCommand().cargo(),
                 List.of(
-                        waypoint(WaypointType.DELIVERY, 1),
-                        waypoint(WaypointType.PICKUP, 2)
+                        waypoint(WaypointType.DESTINATION, 1),
+                        waypoint(WaypointType.ORIGIN, 2)
                 )
         );
     }
 
-    private WaypointCommand waypoint(WaypointType type, int sequence) {
+    public static String validCreateRouteRequestJson() {
+        return """
+                {
+                  "orderNumber": "ORDER-1001",
+                  "cargo": {
+                    "weightKg": 1250.500,
+                    "volumeM3": 8.750,
+                    "adrClass": "4.1",
+                    "temperatureMin": -10.00,
+                    "temperatureMax": 5.00
+                  },
+                  "waypoints": [
+                    {
+                      "type": "ORIGIN",
+                      "sequence": 1,
+                      "latitude": 53.9006,
+                      "longitude": 27.5590,
+                      "address": "Minsk",
+                      "timeWindowStart": "2026-08-25T08:00:00Z",
+                      "timeWindowEnd": "2026-08-25T10:00:00Z"
+                    },
+                    {
+                      "type": "DESTINATION",
+                      "sequence": 2,
+                      "latitude": 52.2297,
+                      "longitude": 21.0122,
+                      "address": "Warsaw",
+                      "timeWindowStart": "2026-08-26T08:00:00Z",
+                      "timeWindowEnd": "2026-08-26T10:00:00Z"
+                    }
+                  ]
+                }
+                """;
+    }
+
+    private static WaypointCommand waypoint(WaypointType type, int sequence) {
         return new WaypointCommand(
                 type,
                 sequence,

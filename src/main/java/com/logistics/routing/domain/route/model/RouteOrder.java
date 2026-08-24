@@ -19,7 +19,7 @@ import com.logistics.routing.domain.route.model.enums.WaypointType;
 
 @Getter
 public class RouteOrder {
-    private final UUID id;
+    private UUID id;
     private final String orderNumber;
     private RouteOrderStatus status;
     private final BigDecimal cargoWeightKg;
@@ -52,7 +52,7 @@ public class RouteOrder {
             Instant createdAt,
             Instant updatedAt
     ) {
-        this.id = Objects.requireNonNull(id, "id must not be null");
+        this.id = id;
         this.orderNumber = Objects.requireNonNull(orderNumber, "orderNumber must not be null");
         this.status = Objects.requireNonNull(status, "status must not be null");
         this.cargoWeightKg = cargoWeightKg;

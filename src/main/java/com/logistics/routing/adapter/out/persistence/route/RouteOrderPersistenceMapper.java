@@ -8,6 +8,7 @@ import org.mapstruct.ReportingPolicy;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.ERROR)
 public interface RouteOrderPersistenceMapper {
 
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "waypoints", ignore = true)
     RouteOrderEntity toEntity(RouteOrder routeOrder);
 

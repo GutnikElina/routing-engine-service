@@ -45,7 +45,7 @@ public class CreateRouteService implements CreateRouteUseCase {
                 : AdrClass.fromCode(cargo.adrClass());
     
         return RouteOrder.create(
-                UUID.randomUUID(),
+                null,
                 command.orderNumber(),
                 cargo.weightKg(),
                 cargo.volumeM3(),

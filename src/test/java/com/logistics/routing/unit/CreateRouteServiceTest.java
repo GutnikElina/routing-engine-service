@@ -7,6 +7,7 @@ import com.logistics.routing.application.route.create.CreateRouteService;
 import com.logistics.routing.application.route.create.RouteCreatedEvent;
 import com.logistics.routing.domain.route.exception.InvalidRouteDraftException;
 import com.logistics.routing.domain.route.model.RouteOrder;
+import com.logistics.routing.testdata.CreateRouteTestData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,19 +19,20 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.UUID;
 
-import static com.logistics.routing.testdata.CreateRouteTestData.ORDER_NUMBER;
-import static com.logistics.routing.testdata.CreateRouteTestData.commandWithInvalidFirstWaypoint;
-import static com.logistics.routing.testdata.CreateRouteTestData.validCreateRouteCommand;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CreateRouteServiceTest {
 
     private static final Instant NOW = Instant.parse("2026-08-24T12:00:00Z");
+    private static final UUID PERSISTED_ROUTE_ID = UUID.fromString("0d2ce760-d04d-4eb6-b768-4924845eb650");
 
     @Mock
     private RouteOrderPersistencePort routeOrderPersistencePort;
@@ -57,7 +59,9 @@ class CreateRouteServiceTest {
 
     @Test
     void execute_shouldPersistRoutePublishCreationEventAndReturnCreatedRoute() {
-        CreateRouteResult result = createRouteService.execute(validCreateRouteCommand());
+        when(routeOrderPersistencePort.save(any(RouteOrder.class))).thenReturn(PERSISTED_ROUTE_ID);
+
+        CreateRouteResult result = createRouteService.execute(CreateRouteTestData.validCreateRouteCommand());
 
         verify(routeOrderPersistencePort).save(routeOrderCaptor.capture());
         verify(outboxEventPort).append(routeCreatedEventCaptor.capture());
@@ -72,7 +76,7 @@ class CreateRouteServiceTest {
                         CreateRouteResult::status,
                         CreateRouteResult::createdAt
                 )
-                .containsExactly(routeOrder.getId(), ORDER_NUMBER, "DRAFT", NOW);
+                .containsExactly(PERSISTED_ROUTE_ID, CreateRouteTestData.ORDER_NUMBER, "DRAFT", NOW);
         assertThat(routeOrder.getWaypoints()).hasSize(2);
         assertThat(routeCreatedEvent)
                 .extracting(
@@ -81,15 +85,15 @@ class CreateRouteServiceTest {
                         RouteCreatedEvent::status,
                         RouteCreatedEvent::occurredAt
                 )
-                .containsExactly(routeOrder.getId(), ORDER_NUMBER, routeOrder.getStatus(), NOW);
+                .containsExactly(PERSISTED_ROUTE_ID, CreateRouteTestData.ORDER_NUMBER, routeOrder.getStatus(), NOW);
         assertThat(routeCreatedEvent.eventId()).isNotNull();
     }
 
     @Test
     void execute_shouldNotCallPortsWhenRouteDraftIsInvalid() {
-        assertThatThrownBy(() -> createRouteService.execute(commandWithInvalidFirstWaypoint()))
+        assertThatThrownBy(() -> createRouteService.execute(CreateRouteTestData.commandWithInvalidFirstWaypoint()))
                 .isInstanceOf(InvalidRouteDraftException.class)
-                .hasMessage("the first waypoint must be a PICKUP");
+                .hasMessage("the first waypoint must be an ORIGIN");
 
         verifyNoInteractions(routeOrderPersistencePort, outboxEventPort);
     }
