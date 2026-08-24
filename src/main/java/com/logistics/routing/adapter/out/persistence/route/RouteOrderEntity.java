@@ -1,6 +1,7 @@
 package com.logistics.routing.adapter.out.persistence.route;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -53,6 +54,7 @@ public class RouteOrderEntity {
     private BigDecimal cargoVolumeM3;
 
     @Column(name = "adr_class", length = 16)
+    @Convert(converter = AdrClassConverter.class)
     private AdrClass adrClass;
 
     @Column(name = "temperature_min", precision = 5, scale = 2)
