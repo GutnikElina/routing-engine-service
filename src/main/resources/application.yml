@@ -30,19 +30,6 @@ spring:
     baseline-on-migrate: true
     locations: classpath:db/migration
     schemas: routing
-  kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
-    producer:
-      client-id: ${spring.application.name}
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      properties:
-        enable.idempotence: true
-        acks: all
-        delivery.timeout.ms: 30000
-        request.timeout.ms: 10000
-        spring.json.add.type.headers: false
-
 datasource-proxy:
   logging: slf4j
   query:
@@ -54,13 +41,3 @@ datasource-proxy:
 
 server:
   port: ${SERVER_PORT:8082}
-
-outbox:
-  publisher:
-    fixed-delay: ${OUTBOX_PUBLISHER_FIXED_DELAY:1000}
-    batch-size: ${OUTBOX_PUBLISHER_BATCH_SIZE:10}
-
-messaging:
-  kafka:
-    topics:
-      route-order-events: ${ROUTE_ORDER_EVENTS_TOPIC:routing.route-order-events.v1}
