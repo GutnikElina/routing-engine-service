@@ -26,8 +26,8 @@ public class CreateRouteService implements CreateRouteUseCase {
     public CreateRouteResult execute(CreateRouteCommand command) {
         Instant now = Instant.now(clock);
         RouteOrder routeOrder = toRouteOrder(command, now);
-        routeOrderPersistencePort.save(routeOrder);
-        return toCreateRouteResult(routeOrder);
+        UUID routeOrderId = routeOrderPersistencePort.save(routeOrder);
+        return toCreateRouteResult(routeOrderId, routeOrder);
     }
 
     private RouteOrder toRouteOrder(CreateRouteCommand command, Instant now) {
@@ -69,9 +69,9 @@ public class CreateRouteService implements CreateRouteUseCase {
         );
     }
     
-    private CreateRouteResult toCreateRouteResult(RouteOrder routeOrder) {
+    private CreateRouteResult toCreateRouteResult(UUID routeOrderId, RouteOrder routeOrder) {
         return new CreateRouteResult(
-            routeOrder.getId(),
+            routeOrderId,
             routeOrder.getOrderNumber(),
             routeOrder.getStatus().name(),
             routeOrder.getCreatedAt()
