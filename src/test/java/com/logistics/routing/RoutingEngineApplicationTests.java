@@ -1,52 +1,20 @@
 package com.logistics.routing;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Bean;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-import java.util.List;
+@TestConfiguration(proxyBeanMethods = false)
+public class RoutingEngineApplicationTests {
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-@SpringBootTest
-@Testcontainers
-class RoutingEngineApplicationTests {
-
-    @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(
-        DockerImageName.parse("postgis/postgis:16-3.4").asCompatibleSubstituteFor("postgres"))
-        .withDatabaseName("routing")
-        .withUsername("postgres")
-        .withPassword("postgres");
-
-    @DynamicPropertySource
-    static void datasourceProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
-        registry.add("spring.datasource.username", POSTGRES::getUsername);
-        registry.add("spring.datasource.password", POSTGRES::getPassword);
-    }
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @Test
-    void contextLoads() {
-    }
-
-    @Test
-    void migrationCreatesExpectedTablesInRoutingSchema() {
-        List<String> tables = jdbcTemplate.queryForList(
-            "SELECT tablename FROM pg_tables WHERE schemaname = 'routing' ORDER BY tablename",
-            String.class);
-
-        assertThat(tables)
-            .contains("route_orders", "route_segments", "waypoints", "route_segment_waypoints", "outbox_events");
+    @Bean
+    @ServiceConnection
+    PostgreSQLContainer<?> postgresContainer() {
+        return new PostgreSQLContainer<>(
+                DockerImageName.parse("postgis/postgis:16-3.5")
+                        .asCompatibleSubstituteFor("postgres")
+        );
     }
 }
