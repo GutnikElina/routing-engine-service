@@ -1,0 +1,25 @@
+# IntelliJ IDEA
+.idea
+*.iml
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.*
+
+# Build output
+/out/
+*.class
