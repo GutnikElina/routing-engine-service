@@ -18,6 +18,7 @@ import lombok.Setter;
 import org.locationtech.jts.geom.Point;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.UuidGenerator;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -31,6 +32,7 @@ import java.util.UUID;
 public class WaypointEntity {
 
     @Id
+    @UuidGenerator(style = UuidGenerator.Style.RANDOM)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

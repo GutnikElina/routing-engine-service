@@ -15,7 +15,7 @@ import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -30,6 +30,7 @@ import java.util.UUID;
 public class OutboxEventEntity {
 
     @Id
+    @UuidGenerator(style = UuidGenerator.Style.RANDOM)
     private UUID id;
 
     @Column(name = "aggregate_type", nullable = false, length = 64)
