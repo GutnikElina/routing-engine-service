@@ -35,7 +35,7 @@ public class Waypoint {
             Instant createdAt,
             Instant updatedAt
     ) {
-        this.id = Objects.requireNonNull(id, "id must not be null");
+        this.id = id;
         this.type = Objects.requireNonNull(type, "type must not be null");
         this.sequenceNumber = Objects.requireNonNull(sequenceNumber, "sequenceNumber must not be null");
         this.latitude = Objects.requireNonNull(latitude, "latitude must not be null");

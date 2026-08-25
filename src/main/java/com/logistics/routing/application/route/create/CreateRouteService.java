@@ -59,7 +59,7 @@ public class CreateRouteService implements CreateRouteUseCase {
     
     private Waypoint toWaypoint(WaypointCommand command, Instant now) {
         return new Waypoint(
-                UUID.randomUUID(),
+                null,
                 command.type(),
                 command.sequence(),
                 command.latitude(),
@@ -78,7 +78,7 @@ public class CreateRouteService implements CreateRouteUseCase {
             Instant occurredAt
     ) {
         return new RouteCreatedEvent(
-                UUID.randomUUID(),
+                null,
                 routeOrderId,
                 routeOrder.getOrderNumber(),
                 routeOrder.getStatus(),

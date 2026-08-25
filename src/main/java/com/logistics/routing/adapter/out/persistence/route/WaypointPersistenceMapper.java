@@ -15,7 +15,6 @@ public class WaypointPersistenceMapper {
 
     public WaypointEntity toEntity(Waypoint waypoint) {
         return WaypointEntity.builder()
-                .id(waypoint.getId())
                 .type(waypoint.getType())
                 .sequenceNumber(waypoint.getSequenceNumber())
                 .location(toPoint(waypoint))

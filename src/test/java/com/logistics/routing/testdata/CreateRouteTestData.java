@@ -3,26 +3,29 @@ package com.logistics.routing.testdata;
 import com.logistics.routing.application.route.create.CargoCommand;
 import com.logistics.routing.application.route.create.CreateRouteCommand;
 import com.logistics.routing.application.route.create.WaypointCommand;
+import com.logistics.routing.domain.route.model.enums.AdrClass;
 import com.logistics.routing.domain.route.model.enums.WaypointType;
 import lombok.experimental.UtilityClass;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 @UtilityClass
 public class CreateRouteTestData {
 
-    public static final String ORDER_NUMBER = "ORDER-123";
+    public static final String ORDER_NUMBER = randomOrderNumber();
 
     public static CreateRouteCommand validCreateRouteCommand() {
         return new CreateRouteCommand(
                 ORDER_NUMBER,
                 new CargoCommand(
-                        new BigDecimal("100.500"),
-                        new BigDecimal("2.250"),
-                        "3",
-                        new BigDecimal("-10.00"),
-                        new BigDecimal("20.00")
+                        randomDecimal(100, 10_000, 3),
+                        randomDecimal(1, 100, 3),
+                        randomAdrClass(),
+                        randomDecimal(-30, 0, 2),
+                        randomDecimal(1, 30, 2)
                 ),
                 List.of(
                         waypoint(WaypointType.ORIGIN, 1),
@@ -43,9 +46,27 @@ public class CreateRouteTestData {
     }
 
     public static String validCreateRouteRequestJson() {
+        return validCreateRouteRequestJson(randomOrderNumber());
+    }
+
+    public static String invalidFirstWaypointCreateRouteRequestJson() {
+        return validCreateRouteRequestJson()
+                .replaceFirst("\"type\": \"ORIGIN\"", "\"type\": \"DESTINATION\"");
+    }
+
+    public static String invalidContractCreateRouteRequestJson() {
         return """
                 {
-                  "orderNumber": "ORDER-1001",
+                  "cargo": {},
+                  "waypoints": []
+                }
+                """;
+    }
+
+    private static String validCreateRouteRequestJson(String orderNumber) {
+        return """
+                {
+                  "orderNumber": "%s",
                   "cargo": {
                     "weightKg": 1250.500,
                     "volumeM3": 8.750,
@@ -74,18 +95,32 @@ public class CreateRouteTestData {
                     }
                   ]
                 }
-                """;
+                """.formatted(orderNumber);
+    }
+
+    private static String randomOrderNumber() {
+        return "ORDER-" + ThreadLocalRandom.current().nextLong(1_000_000, 10_000_000);
     }
 
     private static WaypointCommand waypoint(WaypointType type, int sequence) {
         return new WaypointCommand(
                 type,
                 sequence,
-                new BigDecimal("53.900000"),
-                new BigDecimal("27.566700"),
-                "Minsk",
+                randomDecimal(45, 55, 6),
+                randomDecimal(20, 30, 6),
+                "Test address " + ThreadLocalRandom.current().nextLong(1_000_000, 10_000_000),
                 null,
                 null
         );
+    }
+
+    private static String randomAdrClass() {
+        AdrClass[] adrClasses = AdrClass.values();
+        return adrClasses[ThreadLocalRandom.current().nextInt(adrClasses.length)].code();
+    }
+
+    private static BigDecimal randomDecimal(int origin, int bound, int scale) {
+        return BigDecimal.valueOf(ThreadLocalRandom.current().nextDouble(origin, bound))
+                .setScale(scale, RoundingMode.HALF_UP);
     }
 }
