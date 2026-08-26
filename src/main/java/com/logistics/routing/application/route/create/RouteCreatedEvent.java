@@ -6,7 +6,6 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record RouteCreatedEvent(
-        UUID eventId,
         UUID routeId,
         String orderNumber,
         RouteOrderStatus status,

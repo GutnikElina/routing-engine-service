@@ -16,7 +16,6 @@ public class OutboxEventPersistenceMapper {
 
     public OutboxEventEntity toEntity(RouteCreatedEvent event) {
         return OutboxEventEntity.builder()
-                .id(event.eventId())
                 .aggregateType(ROUTE_ORDER_AGGREGATE_TYPE)
                 .aggregateId(event.routeId().toString())
                 .eventType(ROUTE_CREATED_EVENT_TYPE)

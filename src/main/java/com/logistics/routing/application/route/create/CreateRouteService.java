@@ -78,7 +78,6 @@ public class CreateRouteService implements CreateRouteUseCase {
             Instant occurredAt
     ) {
         return new RouteCreatedEvent(
-                null,
                 routeOrderId,
                 routeOrder.getOrderNumber(),
                 routeOrder.getStatus(),

@@ -86,7 +86,6 @@ class CreateRouteServiceTest {
                         RouteCreatedEvent::occurredAt
                 )
                 .containsExactly(PERSISTED_ROUTE_ID, CreateRouteTestData.ORDER_NUMBER, routeOrder.getStatus(), NOW);
-        assertThat(routeCreatedEvent.eventId()).isNull();
     }
 
     @Test
