@@ -15,10 +15,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.locationtech.jts.geom.Point;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
+import org.locationtech.jts.geom.Point;
+
 import java.time.Instant;
 import java.util.UUID;
 
@@ -46,7 +47,7 @@ public class WaypointEntity {
     @Column(name = "sequence_number", nullable = false)
     private Integer sequenceNumber;
 
-    @Column(name = "location", nullable = false, columnDefinition = "geometry(Point, 4326)")
+    @Column(name = "location", nullable = false, columnDefinition = "geometry")
     private Point location;
 
     @Column(name = "address", length = 255)
