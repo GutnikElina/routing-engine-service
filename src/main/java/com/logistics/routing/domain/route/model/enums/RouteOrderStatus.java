@@ -1,4 +1,4 @@
-package com.logistics.routing.adapter.out.persistence;
+package com.logistics.routing.domain.route.model.enums;
 
 public enum RouteOrderStatus {
     DRAFT,
@@ -9,5 +9,5 @@ public enum RouteOrderStatus {
     NEEDS_REPLANNING,
     DELIVERED,
     FAILED,
-    CLOSED
+    CLOSED,
 }

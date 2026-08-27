@@ -1,0 +1,164 @@
+openapi: 3.0.3
+info:
+  title: Routing Engine API
+  version: 1.0.0
+  description: API for creating route orders.
+
+servers:
+  - url: /
+    description: Service base URL
+
+paths:
+  /api/v1/routes:
+    post:
+      tags:
+        - Routes
+      operationId: createRoute
+      summary: Create a route order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRouteRequest'
+      responses:
+        '201':
+          description: Route order created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateRouteResponse'
+        '400':
+          description: Invalid request or invalid route draft
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '500':
+          description: Unexpected server error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+
+components:
+  schemas:
+    CreateRouteRequest:
+      type: object
+      required:
+        - orderNumber
+        - cargo
+        - waypoints
+      properties:
+        orderNumber:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: '.*\S.*'
+        cargo:
+          $ref: '#/components/schemas/CargoRequest'
+        waypoints:
+          type: array
+          minItems: 2
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/WaypointRequest'
+
+    CargoRequest:
+      type: object
+      properties:
+        weightKg:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+          maximum: 999999999.999
+          multipleOf: 0.001
+        volumeM3:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+          maximum: 999999999.999
+          multipleOf: 0.001
+        adrClass:
+          type: string
+          enum: ['1', '2', '3', '4.1', '4.2', '4.3', '5.1', '5.2', '6.1', '6.2', '7', '8', '9', 'X']
+        temperatureMin:
+          type: number
+          minimum: -999.99
+          maximum: 999.99
+          multipleOf: 0.01
+        temperatureMax:
+          type: number
+          minimum: -999.99
+          maximum: 999.99
+          multipleOf: 0.01
+
+    WaypointRequest:
+      type: object
+      required:
+        - type
+        - sequence
+        - latitude
+        - longitude
+      properties:
+        type:
+          type: string
+          enum: [ORIGIN, DESTINATION, CROSS_DOCK, CUSTOMS]
+        sequence:
+          type: integer
+          format: int32
+          minimum: 1
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+        address:
+          type: string
+          maxLength: 255
+        timeWindowStart:
+          type: string
+          format: date-time
+        timeWindowEnd:
+          type: string
+          format: date-time
+
+    CreateRouteResponse:
+      type: object
+      required:
+        - routeId
+        - orderNumber
+        - status
+        - createdAt
+      properties:
+        routeId:
+          type: string
+          format: uuid
+        orderNumber:
+          type: string
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    ProblemDetail:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+          format: int32
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri
+      additionalProperties: true

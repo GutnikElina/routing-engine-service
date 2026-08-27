@@ -1,4 +1,4 @@
-package com.logistics.routing.adapter.out.persistence;
+package com.logistics.routing.domain.route.model.enums;
 
 import java.util.Arrays;
 
@@ -24,14 +24,14 @@ public enum AdrClass {
         this.code = code;
     }
 
-    public String getCode() {
+    public String code() {
         return code;
     }
 
     public static AdrClass fromCode(String code) {
         return Arrays.stream(values())
-            .filter(value -> value.code.equals(code))
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("Unknown ADR class: " + code));
+                .filter(adrClass -> adrClass.code.equals(code))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Unknown ADR class: " + code));
     }
 }

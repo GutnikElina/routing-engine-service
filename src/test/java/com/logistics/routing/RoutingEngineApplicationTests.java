@@ -20,11 +20,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RoutingEngineApplicationTests {
 
     @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(
-        DockerImageName.parse("postgis/postgis:16-3.4").asCompatibleSubstituteFor("postgres"))
-        .withDatabaseName("routing")
-        .withUsername("postgres")
-        .withPassword("postgres");
+    static PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(
+            DockerImageName.parse("postgis/postgis:16-3.4").asCompatibleSubstituteFor("postgres"))
+            .withDatabaseName("routing")
+            .withUsername("postgres")
+            .withPassword("postgres");
 
     @DynamicPropertySource
     static void datasourceProperties(DynamicPropertyRegistry registry) {
@@ -43,10 +43,10 @@ class RoutingEngineApplicationTests {
     @Test
     void migrationCreatesExpectedTablesInRoutingSchema() {
         List<String> tables = jdbcTemplate.queryForList(
-            "SELECT tablename FROM pg_tables WHERE schemaname = 'routing' ORDER BY tablename",
-            String.class);
+                "SELECT tablename FROM pg_tables WHERE schemaname = 'routing' ORDER BY tablename",
+                String.class);
 
         assertThat(tables)
-            .contains("route_orders", "route_segments", "waypoints", "route_segment_waypoints", "outbox_events");
+                .contains("route_orders", "route_segments", "waypoints", "route_segment_waypoints", "outbox_events");
     }
 }
