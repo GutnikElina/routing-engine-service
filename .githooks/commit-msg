@@ -1,0 +1,15 @@
+#!/bin/sh
+
+first_line=$(head -n1 "$1")
+
+echo "$first_line" | grep -qE '^(Merge |Revert |fixup! |squash! )' && exit 0
+
+pattern='^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([A-Za-z0-9._/-]+\))?!?: .+'
+if echo "$first_line" | grep -qE "$pattern"; then
+	exit 0
+fi
+
+echo "commit-msg: subject must follow Conventional Commits" >&2
+echo "  expected: <type>(<scope>): <subject>   e.g. feat(routing): add distance matrix cache" >&2
+echo "  got:      $first_line" >&2
+exit 1
