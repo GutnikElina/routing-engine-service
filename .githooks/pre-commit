@@ -1,0 +1,17 @@
+#!/bin/sh
+set -e
+
+changed=$(git diff --cached --name-only --diff-filter=ACMR)
+echo "$changed" | grep -qE '\.java$|(^|/)pom\.xml$' || exit 0
+
+if [ -x "./mvnw" ]; then
+	MVN="./mvnw"
+elif command -v mvn >/dev/null 2>&1; then
+	MVN="mvn"
+else
+	echo "pre-commit: Maven not found (no ./mvnw and no mvn on PATH), skipping build check"
+	exit 0
+fi
+
+echo "pre-commit: $MVN -q -B -ntp -DskipTests compile test-compile"
+$MVN -q -B -ntp -DskipTests compile test-compile
