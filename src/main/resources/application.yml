@@ -44,3 +44,14 @@ datasource-proxy:
 
 server:
   port: ${SERVER_PORT:8082}
+
+routing:
+  max-coordinates: ${ROUTING_MAX_COORDINATES:100}
+  route-overview: ${ROUTING_ROUTE_OVERVIEW:simplified}
+  connect-timeout: 2s
+  read-timeout: 15s
+  osrm-base-urls:
+    TRUCK: ${OSRM_TRUCK_URL:${OSRM_BASE_URL:http://localhost:5000}}
+    TRAIN: ${OSRM_TRAIN_URL:http://localhost:5001}
+    VESSEL: ${OSRM_VESSEL_URL:http://localhost:5002}
+  plane-average-speed-kmh: ${PLANE_AVERAGE_SPEED_KMH:800}
