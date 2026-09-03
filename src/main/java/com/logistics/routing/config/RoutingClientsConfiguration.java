@@ -23,15 +23,46 @@ public class RoutingClientsConfiguration {
     private static final String OSRM_PROFILE = "driving";
 
     @Bean
-    Map<TransportType, RoutingClient> routingClients(RoutingProperties properties) {
+    Map<TransportType, RoutingClient> routingClients(
+            RoutingClient truckOsrmClient,
+            RoutingClient trainOsrmClient,
+            RoutingClient vesselOsrmClient,
+            RoutingClient planeStraightLineClient
+    ) {
         Map<TransportType, RoutingClient> clients = new EnumMap<>(TransportType.class);
-
-        clients.put(TransportType.TRUCK, osrmClient(requireOsrmUrl(properties, TransportType.TRUCK), properties));
-        clients.put(TransportType.TRAIN, osrmClient(requireOsrmUrl(properties, TransportType.TRAIN), properties));
-        clients.put(TransportType.VESSEL, osrmClient(requireOsrmUrl(properties, TransportType.VESSEL), properties));
-        clients.put(TransportType.PLANE, new StraightLineRoutingClient(properties.getPlaneAverageSpeedKmh()));
-
+        clients.put(TransportType.TRUCK, truckOsrmClient);
+        clients.put(TransportType.TRAIN, trainOsrmClient);
+        clients.put(TransportType.VESSEL, vesselOsrmClient);
+        clients.put(TransportType.PLANE, planeStraightLineClient);
         return clients;
+    }
+
+    @Bean
+    RoutingClient truckOsrmClient(RoutingProperties properties) {
+        return createOsrmClient(properties, TransportType.TRUCK);
+    }
+
+    @Bean
+    RoutingClient trainOsrmClient(RoutingProperties properties) {
+        return createOsrmClient(properties, TransportType.TRAIN);
+    }
+
+    @Bean
+    RoutingClient vesselOsrmClient(RoutingProperties properties) {
+        return createOsrmClient(properties, TransportType.VESSEL);
+    }
+
+    @Bean
+    RoutingClient planeStraightLineClient(RoutingProperties properties) {
+        return new StraightLineRoutingClient(properties.getPlaneAverageSpeedKmh());
+    }
+
+    private OsrmRoutingClient createOsrmClient(RoutingProperties properties, TransportType transportType) {
+        return new OsrmRoutingClient(
+                buildRestClient(requireOsrmUrl(properties, transportType), properties),
+                OSRM_PROFILE,
+                properties.getRouteOverview()
+        );
     }
 
     private String requireOsrmUrl(RoutingProperties properties, TransportType transportType) {
@@ -40,14 +71,6 @@ public class RoutingClientsConfiguration {
             throw new IllegalStateException("OSRM base URL is not configured for transport type: " + transportType);
         }
         return baseUrl;
-    }
-
-    private OsrmRoutingClient osrmClient(String baseUrl, RoutingProperties properties) {
-        return new OsrmRoutingClient(
-                buildRestClient(baseUrl, properties),
-                OSRM_PROFILE,
-                properties.getRouteOverview()
-        );
     }
 
     private RestClient buildRestClient(String baseUrl, RoutingProperties properties) {

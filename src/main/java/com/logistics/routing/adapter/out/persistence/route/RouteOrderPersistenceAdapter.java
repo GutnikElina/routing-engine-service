@@ -13,13 +13,12 @@ public class RouteOrderPersistenceAdapter implements RouteOrderPersistencePort {
 
     private final RouteOrderRepository routeOrderRepository;
     private final RouteOrderPersistenceMapper routeOrderPersistenceMapper;
-    private final WaypointPersistenceMapper waypointPersistenceMapper;
 
     @Override
     public UUID save(RouteOrder routeOrder) {
         RouteOrderEntity routeOrderEntity = routeOrderPersistenceMapper.toEntity(routeOrder);
         routeOrder.getWaypoints().stream()
-                .map(waypointPersistenceMapper::toEntity)
+                .map(WaypointPersistenceMapper::toEntity)
                 .forEach(routeOrderEntity::addWaypoint);
 
         return routeOrderRepository.save(routeOrderEntity).getId();
