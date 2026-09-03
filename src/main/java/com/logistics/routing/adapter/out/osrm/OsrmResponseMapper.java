@@ -47,7 +47,7 @@ public class OsrmResponseMapper {
 
         List<List<Double>> coordinates = route.geometry().coordinates();
         if (coordinates.size() > LARGE_GEOMETRY_WARN_THRESHOLD) {
-            log.warn("OSRM returned unusually large route geometry with {} points", coordinates.size());
+            log.atWarn().log("OSRM returned unusually large route geometry with {} points", coordinates.size());
         }
 
         List<GeoCoordinate> path = coordinates.stream()

@@ -21,6 +21,8 @@
         <java.version>21</java.version>
         <datasource-proxy.version>1.9.2</datasource-proxy.version>
         <mapstruct.version>1.6.3</mapstruct.version>
+        <resilience4j.version>2.3.0</resilience4j.version>
+        <wiremock.version>4.2.2</wiremock.version>
     </properties>
 
     <dependencies>
@@ -59,6 +61,15 @@
             <version>${datasource-proxy.version}</version>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-spring-boot3</artifactId>
+            <version>${resilience4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
         <!-- TODO: Internal starter to be integrated when available -->
         <!--
         <dependency>
@@ -95,6 +106,12 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wiremock.integrations</groupId>
+            <artifactId>wiremock-spring-boot</artifactId>
+            <version>${wiremock.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
