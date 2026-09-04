@@ -44,3 +44,6 @@ datasource-proxy:
 
 server:
   port: ${SERVER_PORT:8082}
+
+geofence:
+  default-radius-meters: ${GEOFENCE_DEFAULT_RADIUS_METERS:150}
