@@ -55,3 +55,30 @@ routing:
     TRAIN: ${OSRM_TRAIN_URL:http://localhost:5001}
     VESSEL: ${OSRM_VESSEL_URL:http://localhost:5002}
   plane-average-speed-kmh: ${PLANE_AVERAGE_SPEED_KMH:800}
+
+resilience4j:
+  retry:
+    retry-aspect-order: 2
+    instances:
+      osrm:
+        max-attempts: 3
+        wait-duration: 200ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - com.logistics.routing.domain.route.exception.RoutingEngineUnavailableException
+  circuitbreaker:
+    circuit-breaker-aspect-order: 1
+    instances:
+      osrm:
+        register-health-indicator: false
+        sliding-window-size: 20
+        minimum-number-of-calls: 10
+        failure-rate-threshold: 50
+        slow-call-rate-threshold: 50
+        slow-call-duration-threshold: 5s
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        record-exceptions:
+          - com.logistics.routing.domain.route.exception.RoutingEngineException
