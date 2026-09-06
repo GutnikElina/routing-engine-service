@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.util.List;
+import java.util.function.Supplier;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -39,33 +40,28 @@ public class OsrmRoutingClient implements RoutingClient {
     @Retry(name = "osrm")
     @CircuitBreaker(name = "osrm")
     public DistanceMatrix getDistanceMatrix(List<GeoCoordinate> coordinates) {
-        OsrmTableRequest request = OsrmTableRequest.of(toOsrmCoordinates(coordinates));
-
-        try {
-            OsrmTableResponse response = restClient.post()
-                    .uri("/table/v1/{profile}", profile)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(request)
-                    .retrieve()
-                    .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), (req, res) -> {
-                        throw toHttpException(res);
-                    })
-                    .body(OsrmTableResponse.class);
-
-            return OsrmResponseMapper.toDistanceMatrix(response);
-        } catch (RoutingEngineException exception) {
-            throw exception;
-        } catch (ResourceAccessException exception) {
-            log.atDebug().setCause(exception).log("OSRM table request failed due to connectivity issue");
-            throw new RoutingEngineUnavailableException("OSRM service unavailable", exception);
-        } catch (RestClientException exception) {
-            if (isConnectivityIssue(exception)) {
-                log.atDebug().setCause(exception).log("OSRM table request failed due to connectivity issue");
-                throw new RoutingEngineUnavailableException("OSRM service unavailable", exception);
-            }
-            log.atDebug().setCause(exception).log("OSRM table request failed");
-            throw new RoutingEngineException("OSRM table request failed", exception);
-        }
+        OsrmTableRequest request = OsrmTableRequest.of(
+                toOsrmCoordinates(coordinates)
+        );
+    
+        OsrmTableResponse response = executeRequest(
+                () -> restClient.post()
+                        .uri("/table/v1/{profile}", profile)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(request)
+                        .retrieve()
+                        .onStatus(
+                                status -> status.is4xxClientError()
+                                        || status.is5xxServerError(),
+                                (req, res) -> {
+                                    throw toHttpException(res);
+                                }
+                        )
+                        .body(OsrmTableResponse.class),
+                "table"
+        );
+    
+        return OsrmResponseMapper.toDistanceMatrix(response);
     }
 
     @Override
@@ -76,32 +72,70 @@ public class OsrmRoutingClient implements RoutingClient {
                 toOsrmCoordinates(waypointsInOrder),
                 routeOverview
         );
+    
+        OsrmRouteResponse response = executeRequest(
+                () -> restClient.post()
+                        .uri("/route/v1/{profile}", profile)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(request)
+                        .retrieve()
+                        .onStatus(
+                                status -> status.is4xxClientError()
+                                        || status.is5xxServerError(),
+                                (req, res) -> {
+                                    throw toHttpException(res);
+                                }
+                        )
+                        .body(OsrmRouteResponse.class),
+                "route"
+        );
+    
+        return OsrmResponseMapper.toRouteGeometry(response);
+    }
 
+    private <T> T executeRequest(
+        Supplier<T> request,
+        String operation
+    ) {
         try {
-            OsrmRouteResponse response = restClient.post()
-                    .uri("/route/v1/{profile}", profile)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(request)
-                    .retrieve()
-                    .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), (req, res) -> {
-                        throw toHttpException(res);
-                    })
-                    .body(OsrmRouteResponse.class);
-
-            return OsrmResponseMapper.toRouteGeometry(response);
-        } catch (RoutingEngineException exception) {
-            throw exception;
-        } catch (ResourceAccessException exception) {
-            log.atDebug().setCause(exception).log("OSRM route request failed due to connectivity issue");
-            throw new RoutingEngineUnavailableException("OSRM service unavailable", exception);
+            return request.get();
         } catch (RestClientException exception) {
             if (isConnectivityIssue(exception)) {
-                log.atDebug().setCause(exception).log("OSRM route request failed due to connectivity issue");
-                throw new RoutingEngineUnavailableException("OSRM service unavailable", exception);
+                log.atDebug()
+                        .setCause(exception)
+                        .log(
+                                "OSRM {} request failed due to connectivity issue",
+                                operation
+                        );
+
+                throw new RoutingEngineUnavailableException(
+                        "OSRM service unavailable",
+                        exception
+                );
             }
-            log.atDebug().setCause(exception).log("OSRM route request failed");
-            throw new RoutingEngineException("OSRM route request failed", exception);
+
+            log.atDebug()
+                    .setCause(exception)
+                    .log("OSRM {} request failed", operation);
+
+            throw new RoutingEngineException(
+                    "OSRM " + operation + " request failed",
+                    exception
+            );
         }
+    }
+
+    private boolean isConnectivityIssue(Throwable exception) {
+        Throwable current = exception;
+        while (current != null) {
+            if (current instanceof SocketTimeoutException
+                    || current instanceof ConnectException
+                    || current instanceof ResourceAccessException) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
     }
 
     private List<List<Double>> toOsrmCoordinates(List<GeoCoordinate> coordinates) {
@@ -118,16 +152,4 @@ public class OsrmRoutingClient implements RoutingClient {
         return new RoutingEngineException("OSRM request failed with HTTP " + response.getStatusCode().value());
     }
 
-    private boolean isConnectivityIssue(Throwable exception) {
-        Throwable current = exception;
-        while (current != null) {
-            if (current instanceof ResourceAccessException
-                    || current instanceof SocketTimeoutException
-                    || current instanceof ConnectException) {
-                return true;
-            }
-            current = current.getCause();
-        }
-        return false;
-    }
 }

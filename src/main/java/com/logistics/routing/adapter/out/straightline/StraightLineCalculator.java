@@ -9,12 +9,12 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 
 @UtilityClass
-class StraightLineCalculator {
+public class StraightLineCalculator {
 
     private static final MathContext MATH_CONTEXT = new MathContext(16, RoundingMode.HALF_UP);
     private static final BigDecimal EARTH_RADIUS_METERS = new BigDecimal("6371000");
 
-    BigDecimal distanceMeters(GeoCoordinate from, GeoCoordinate to) {
+    public BigDecimal distanceMeters(GeoCoordinate from, GeoCoordinate to) {
         double centralAngle = centralAngleRadians(
                 toRadians(from.latitude()),
                 toRadians(from.longitude()),
@@ -24,7 +24,7 @@ class StraightLineCalculator {
         return BigDecimal.valueOf(centralAngle).multiply(EARTH_RADIUS_METERS, MATH_CONTEXT);
     }
 
-    BigDecimal durationSeconds(BigDecimal distanceMeters, BigDecimal averageSpeedKmh) {
+    public BigDecimal durationSeconds(BigDecimal distanceMeters, BigDecimal averageSpeedKmh) {
         BigDecimal speedMetersPerSecond = averageSpeedKmh
                 .multiply(new BigDecimal("1000"), MATH_CONTEXT)
                 .divide(new BigDecimal("3600"), MATH_CONTEXT);
@@ -36,7 +36,7 @@ class StraightLineCalculator {
         return distanceMeters.divide(speedMetersPerSecond, MATH_CONTEXT);
     }
 
-    GeoCoordinate interpolate(GeoCoordinate from, GeoCoordinate to, BigDecimal fraction) {
+    public GeoCoordinate interpolate(GeoCoordinate from, GeoCoordinate to, BigDecimal fraction) {
         double lat1 = toRadians(from.latitude());
         double lon1 = toRadians(from.longitude());
         double lat2 = toRadians(to.latitude());
