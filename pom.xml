@@ -23,6 +23,7 @@
         <mapstruct.version>1.6.3</mapstruct.version>
         <resilience4j.version>2.3.0</resilience4j.version>
         <wiremock.version>4.2.2</wiremock.version>
+        <ortools.version>9.14.6206</ortools.version>
     </properties>
 
     <dependencies>
@@ -54,6 +55,11 @@
         <dependency>
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-spatial</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.ortools</groupId>
+            <artifactId>ortools-java</artifactId>
+            <version>${ortools.version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.gavlyukovskiy</groupId>
