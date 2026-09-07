@@ -15,9 +15,9 @@ import java.util.concurrent.ThreadLocalRandom;
 @UtilityClass
 public class CreateRouteTestData {
 
-    public final String ORDER_NUMBER = randomOrderNumber();
+    public static final String ORDER_NUMBER = randomOrderNumber();
 
-    public CreateRouteCommand validCreateRouteCommand() {
+    public static CreateRouteCommand validCreateRouteCommand() {
         return new CreateRouteCommand(
                 ORDER_NUMBER,
                 new CargoCommand(
@@ -34,7 +34,7 @@ public class CreateRouteTestData {
         );
     }
 
-    public CreateRouteCommand commandWithInvalidFirstWaypoint() {
+    public static CreateRouteCommand commandWithInvalidFirstWaypoint() {
         return new CreateRouteCommand(
                 ORDER_NUMBER,
                 validCreateRouteCommand().cargo(),
@@ -45,16 +45,16 @@ public class CreateRouteTestData {
         );
     }
 
-    public String validCreateRouteRequestJson() {
+    public static String validCreateRouteRequestJson() {
         return validCreateRouteRequestJson(randomOrderNumber());
     }
 
-    public String invalidFirstWaypointCreateRouteRequestJson() {
+    public static String invalidFirstWaypointCreateRouteRequestJson() {
         return validCreateRouteRequestJson()
                 .replaceFirst("\"type\": \"ORIGIN\"", "\"type\": \"DESTINATION\"");
     }
 
-    public String invalidContractCreateRouteRequestJson() {
+    public static String invalidContractCreateRouteRequestJson() {
         return """
                 {
                   "cargo": {},
@@ -63,7 +63,7 @@ public class CreateRouteTestData {
                 """;
     }
 
-    private String validCreateRouteRequestJson(String orderNumber) {
+    private static String validCreateRouteRequestJson(String orderNumber) {
         return """
                 {
                   "orderNumber": "%s",
@@ -98,11 +98,11 @@ public class CreateRouteTestData {
                 """.formatted(orderNumber);
     }
 
-    private String randomOrderNumber() {
+    private static String randomOrderNumber() {
         return "ORDER-" + ThreadLocalRandom.current().nextLong(1_000_000, 10_000_000);
     }
 
-    private WaypointCommand waypoint(WaypointType type, int sequence) {
+    private static WaypointCommand waypoint(WaypointType type, int sequence) {
         return new WaypointCommand(
                 type,
                 sequence,
@@ -114,12 +114,12 @@ public class CreateRouteTestData {
         );
     }
 
-    private String randomAdrClass() {
+    private static String randomAdrClass() {
         AdrClass[] adrClasses = AdrClass.values();
         return adrClasses[ThreadLocalRandom.current().nextInt(adrClasses.length)].code();
     }
 
-    private BigDecimal randomDecimal(int origin, int bound, int scale) {
+    private static BigDecimal randomDecimal(int origin, int bound, int scale) {
         return BigDecimal.valueOf(ThreadLocalRandom.current().nextDouble(origin, bound))
                 .setScale(scale, RoundingMode.HALF_UP);
     }

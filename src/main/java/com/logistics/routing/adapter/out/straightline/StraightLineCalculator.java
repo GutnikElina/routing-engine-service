@@ -43,6 +43,13 @@ public class StraightLineCalculator {
         double lon2 = toRadians(to.longitude());
         double fractionValue = fraction.doubleValue();
 
+        if (fractionValue <= 0.0) {
+            return from;
+        }
+        if (fractionValue >= 1.0) {
+            return to;
+        }
+
         double delta = centralAngleRadians(lat1, lon1, lat2, lon2);
         if (delta == 0.0) {
             return from;

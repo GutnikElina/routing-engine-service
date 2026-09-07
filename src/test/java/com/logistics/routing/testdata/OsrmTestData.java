@@ -11,18 +11,18 @@ import java.util.List;
 @UtilityClass
 public class OsrmTestData {
 
-    public GeoCoordinate coordinate(double latitude, double longitude) {
+    public static GeoCoordinate coordinate(double latitude, double longitude) {
         return new GeoCoordinate(
                 BigDecimal.valueOf(latitude),
                 BigDecimal.valueOf(longitude)
         );
     }
 
-    public OsrmTableResponse okTableResponse(List<List<Double>> durations, List<List<Double>> distances) {
+    public static OsrmTableResponse okTableResponse(List<List<Double>> durations, List<List<Double>> distances) {
         return new OsrmTableResponse("Ok", null, durations, distances);
     }
 
-    public OsrmRouteResponse okRouteResponse(List<List<Double>> coordinates, double distance, double duration) {
+    public static OsrmRouteResponse okRouteResponse(List<List<Double>> coordinates, double distance, double duration) {
         return new OsrmRouteResponse("Ok", null, List.of(new OsrmRouteResponse.Route(
                 new OsrmRouteResponse.Geometry("LineString", coordinates), distance, duration)));
     }

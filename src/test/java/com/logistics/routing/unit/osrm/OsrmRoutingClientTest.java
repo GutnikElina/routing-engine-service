@@ -1,14 +1,5 @@
 package com.logistics.routing.unit.osrm;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
-
 import com.logistics.routing.adapter.out.osrm.OsrmRoutingClient;
 import com.logistics.routing.adapter.out.osrm.dto.OsrmRouteResponse;
 import com.logistics.routing.adapter.out.osrm.dto.OsrmTableResponse;
@@ -16,19 +7,30 @@ import com.logistics.routing.application.routing.DistanceMatrix;
 import com.logistics.routing.application.routing.RouteGeometry;
 import com.logistics.routing.domain.route.exception.RoutingEngineException;
 import com.logistics.routing.domain.route.exception.RoutingEngineUnavailableException;
-
-import static com.logistics.routing.testdata.OsrmTestData.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.MediaType;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 
 import java.net.SocketTimeoutException;
 import java.util.List;
+
+import static com.logistics.routing.testdata.OsrmTestData.coordinate;
+import static com.logistics.routing.testdata.OsrmTestData.okRouteResponse;
+import static com.logistics.routing.testdata.OsrmTestData.okTableResponse;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class OsrmRoutingClientTest {
@@ -36,7 +38,17 @@ class OsrmRoutingClientTest {
     private static final String PROFILE = "driving";
     private static final String ROUTE_OVERVIEW = "simplified";
 
-    private final RestClient restClient = Mockito.mock(RestClient.class, RETURNS_DEEP_STUBS);
+    @Mock
+    private RestClient restClient;
+
+    @Mock
+    private RestClient.RequestBodyUriSpec requestBodyUriSpec;
+
+    @Mock
+    private RestClient.RequestBodySpec requestBodySpec;
+
+    @Mock
+    private RestClient.ResponseSpec responseSpec;
 
     private OsrmRoutingClient client;
 
@@ -45,24 +57,42 @@ class OsrmRoutingClientTest {
         client = new OsrmRoutingClient(restClient, PROFILE, ROUTE_OVERVIEW);
     }
 
+    private void stubTableRequestChain() {
+        when(restClient.post()).thenReturn(requestBodyUriSpec);
+        when(requestBodyUriSpec.uri(eq("/table/v1/{profile}"), eq(PROFILE))).thenReturn(requestBodySpec);
+        when(requestBodySpec.contentType(MediaType.APPLICATION_JSON)).thenReturn(requestBodySpec);
+        doReturn(requestBodySpec).when(requestBodySpec).body(any(Object.class));
+        when(requestBodySpec.retrieve()).thenReturn(responseSpec);
+        doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
+    }
+
+    private void stubRouteRequestChain() {
+        when(restClient.post()).thenReturn(requestBodyUriSpec);
+        when(requestBodyUriSpec.uri(eq("/route/v1/{profile}"), eq(PROFILE))).thenReturn(requestBodySpec);
+        when(requestBodySpec.contentType(MediaType.APPLICATION_JSON)).thenReturn(requestBodySpec);
+        doReturn(requestBodySpec).when(requestBodySpec).body(any(Object.class));
+        when(requestBodySpec.retrieve()).thenReturn(responseSpec);
+        doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
+    }
+
     private void mockTableSuccess(OsrmTableResponse response) {
-        when(restClient.post().uri(anyString(), anyString()).contentType(any()).body(any()).retrieve()
-                .onStatus(any(), any()).body(OsrmTableResponse.class)).thenReturn(response);
+        stubTableRequestChain();
+        when(responseSpec.body(OsrmTableResponse.class)).thenReturn(response);
     }
 
     private void mockRouteSuccess(OsrmRouteResponse response) {
-        when(restClient.post().uri(anyString(), anyString()).contentType(any()).body(any()).retrieve()
-                .onStatus(any(), any()).body(OsrmRouteResponse.class)).thenReturn(response);
+        stubRouteRequestChain();
+        when(responseSpec.body(OsrmRouteResponse.class)).thenReturn(response);
     }
 
-    private void mockTableThenThrow(RuntimeException ex) {
-        when(restClient.post().uri(anyString(), anyString()).contentType(any()).body(any()).retrieve()
-                .onStatus(any(), any()).body(OsrmTableResponse.class)).thenThrow(ex);
+    private void mockTableThenThrow(RuntimeException exception) {
+        stubTableRequestChain();
+        doThrow(exception).when(responseSpec).body(OsrmTableResponse.class);
     }
 
-    private void mockRouteThenThrow(RuntimeException ex) {
-        when(restClient.post().uri(anyString(), anyString()).contentType(any()).body(any()).retrieve()
-                .onStatus(any(), any()).body(OsrmRouteResponse.class)).thenThrow(ex);
+    private void mockRouteThenThrow(RuntimeException exception) {
+        stubRouteRequestChain();
+        doThrow(exception).when(responseSpec).body(OsrmRouteResponse.class);
     }
 
     @Nested

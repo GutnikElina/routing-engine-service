@@ -23,7 +23,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
 import java.io.IOException;
-import java.net.ConnectException;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.List;
 import java.util.function.Supplier;
@@ -129,7 +129,7 @@ public class OsrmRoutingClient implements RoutingClient {
         Throwable current = exception;
         while (current != null) {
             if (current instanceof SocketTimeoutException
-                    || current instanceof ConnectException
+                    || current instanceof SocketException
                     || current instanceof ResourceAccessException) {
                 return true;
             }
