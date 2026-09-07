@@ -4,6 +4,7 @@ import lombok.experimental.UtilityClass;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 @UtilityClass
 class OsrmNumberConverter {
@@ -17,20 +18,13 @@ class OsrmNumberConverter {
     }
 
     List<List<BigDecimal>> toBigDecimalMatrix(List<List<Double>> matrix) {
-        if (matrix == null) {
-            return null;
-        }
-
         return matrix.stream()
                 .map(OsrmNumberConverter::toBigDecimalRow)
                 .toList();
     }
 
     private List<BigDecimal> toBigDecimalRow(List<Double> row) {
-        if (row == null) {
-            return null;
-        }
-
+        Objects.requireNonNull(row, "OSRM matrix row must not be null");
         return row.stream()
                 .map(OsrmNumberConverter::toBigDecimal)
                 .toList();
