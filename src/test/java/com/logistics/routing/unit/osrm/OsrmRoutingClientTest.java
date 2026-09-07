@@ -7,6 +7,10 @@ import com.logistics.routing.application.routing.DistanceMatrix;
 import com.logistics.routing.application.routing.RouteGeometry;
 import com.logistics.routing.domain.route.exception.RoutingEngineException;
 import com.logistics.routing.domain.route.exception.RoutingEngineUnavailableException;
+import com.logistics.routing.domain.route.model.enums.TransportType;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.github.resilience4j.retry.RetryConfig;
+import io.github.resilience4j.retry.RetryRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -54,7 +58,14 @@ class OsrmRoutingClientTest {
 
     @BeforeEach
     void setUp() {
-        client = new OsrmRoutingClient(restClient, PROFILE, ROUTE_OVERVIEW);
+        client = new OsrmRoutingClient(
+                restClient,
+                PROFILE,
+                ROUTE_OVERVIEW,
+                OsrmRoutingClient.resilienceInstanceName(TransportType.TRUCK),
+                CircuitBreakerRegistry.ofDefaults(),
+                RetryRegistry.of(RetryConfig.custom().maxAttempts(1).build())
+        );
     }
 
     private void stubTableRequestChain() {

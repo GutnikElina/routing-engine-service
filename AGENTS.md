@@ -55,8 +55,8 @@ On Windows PowerShell, quote multi-class tests: `"-Dtest=A,B"`.
 4. Lombok `@UtilityClass`: methods are package-private unless marked `public`.
 5. Tests: nested by behavior, factories in `testdata`, AssertJ. Integration tests use Testcontainers PostGIS + `@ServiceConnection` (Docker required). Narrower rules may live in `.cursor/rules/*.mdc`.
 6. OSRM unit tests: stub `RestClient` step-by-step; use `body(any(Object.class))` (fluent overload trap). Avoid `RETURNS_DEEP_STUBS` for RestClient.
-7. OSRM resilience IT: WireMock + `@EnableWireMock` + profile `test` (`application-test.yml`). `@Retry` / `@CircuitBreaker` apply only via Spring beans — never `new OsrmRoutingClient(...)` for those tests.
-8. Retry only `RoutingEngineUnavailableException` (network / reset / timeout). HTTP 4xx/5xx → `RoutingEngineException`, **no** retry. Circuit breaker records `RoutingEngineException`.
+7. OSRM resilience IT: WireMock + `@EnableWireMock` + profile `test` (`application-test.yml`). Resilience is applied inside Spring-managed `OsrmRoutingClient` beans (registry decorate) — never `new OsrmRoutingClient(...)` for those tests.
+8. Retry only `RoutingEngineUnavailableException` (network / reset / timeout). HTTP 4xx/5xx → `RoutingEngineException`, **no** retry. Circuit breaker records `RoutingEngineException`. Open breaker → `RoutingEngineUnavailableException` (not `CallNotPermittedException`). Per-transport instances: `osrm-truck` / `osrm-train` / `osrm-vessel`.
 9. Connectivity: walk the cause chain for `ResourceAccessException`, `SocketException`, `SocketTimeoutException`.
 10. Straight-line geometry: interpolate each leg (`INTERPOLATION_STEPS_PER_LEG = 16`); distance/duration from waypoints, not polyline length. `interpolate` returns endpoints when fraction `≤ 0` / `≥ 1`.
 
@@ -65,7 +65,7 @@ On Windows PowerShell, quote multi-class tests: `"-Dtest=A,B"`.
 | What | Where |
 |------|--------|
 | OSRM URLs / timeouts / plane speed | `routing.*` in `application.yml` |
-| Retry / circuit breaker | `resilience4j.*` (`osrm` instance) |
+| Retry / circuit breaker | `resilience4j.*` (`osrm-truck` / `osrm-train` / `osrm-vessel`) |
 | Fast resilience for IT | `src/test/resources/application-test.yml` |
 | DB schema | Flyway, schema `routing` |
 | Specs | `docs/architecture/…`, `docs/requirements/…` |

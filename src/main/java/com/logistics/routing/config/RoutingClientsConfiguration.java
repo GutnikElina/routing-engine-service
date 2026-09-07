@@ -5,6 +5,8 @@ import com.logistics.routing.adapter.out.routing.RoutingClient;
 import com.logistics.routing.adapter.out.routing.RoutingProperties;
 import com.logistics.routing.adapter.out.straightline.StraightLineRoutingClient;
 import com.logistics.routing.domain.route.model.enums.TransportType;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.github.resilience4j.retry.RetryRegistry;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
 import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
@@ -38,18 +40,30 @@ public class RoutingClientsConfiguration {
     }
 
     @Bean
-    RoutingClient truckOsrmClient(RoutingProperties properties) {
-        return createOsrmClient(properties, TransportType.TRUCK);
+    RoutingClient truckOsrmClient(
+            RoutingProperties properties,
+            CircuitBreakerRegistry circuitBreakerRegistry,
+            RetryRegistry retryRegistry
+    ) {
+        return createOsrmClient(properties, TransportType.TRUCK, circuitBreakerRegistry, retryRegistry);
     }
 
     @Bean
-    RoutingClient trainOsrmClient(RoutingProperties properties) {
-        return createOsrmClient(properties, TransportType.TRAIN);
+    RoutingClient trainOsrmClient(
+            RoutingProperties properties,
+            CircuitBreakerRegistry circuitBreakerRegistry,
+            RetryRegistry retryRegistry
+    ) {
+        return createOsrmClient(properties, TransportType.TRAIN, circuitBreakerRegistry, retryRegistry);
     }
 
     @Bean
-    RoutingClient vesselOsrmClient(RoutingProperties properties) {
-        return createOsrmClient(properties, TransportType.VESSEL);
+    RoutingClient vesselOsrmClient(
+            RoutingProperties properties,
+            CircuitBreakerRegistry circuitBreakerRegistry,
+            RetryRegistry retryRegistry
+    ) {
+        return createOsrmClient(properties, TransportType.VESSEL, circuitBreakerRegistry, retryRegistry);
     }
 
     @Bean
@@ -57,11 +71,19 @@ public class RoutingClientsConfiguration {
         return new StraightLineRoutingClient(properties.getPlaneAverageSpeedKmh());
     }
 
-    private OsrmRoutingClient createOsrmClient(RoutingProperties properties, TransportType transportType) {
+    private OsrmRoutingClient createOsrmClient(
+            RoutingProperties properties,
+            TransportType transportType,
+            CircuitBreakerRegistry circuitBreakerRegistry,
+            RetryRegistry retryRegistry
+    ) {
         return new OsrmRoutingClient(
                 buildRestClient(requireOsrmUrl(properties, transportType), properties),
                 OSRM_PROFILE,
-                properties.getRouteOverview()
+                properties.getRouteOverview(),
+                OsrmRoutingClient.resilienceInstanceName(transportType),
+                circuitBreakerRegistry,
+                retryRegistry
         );
     }
 

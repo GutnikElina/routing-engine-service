@@ -58,8 +58,7 @@ routing:
 
 resilience4j:
   retry:
-    retry-aspect-order: 2
-    instances:
+    configs:
       osrm:
         max-attempts: 3
         wait-duration: 200ms
@@ -67,9 +66,15 @@ resilience4j:
         exponential-backoff-multiplier: 2
         retry-exceptions:
           - com.logistics.routing.domain.route.exception.RoutingEngineUnavailableException
-  circuitbreaker:
-    circuit-breaker-aspect-order: 1
     instances:
+      osrm-truck:
+        baseConfig: osrm
+      osrm-train:
+        baseConfig: osrm
+      osrm-vessel:
+        baseConfig: osrm
+  circuitbreaker:
+    configs:
       osrm:
         register-health-indicator: false
         sliding-window-size: 20
@@ -82,3 +87,10 @@ resilience4j:
         automatic-transition-from-open-to-half-open-enabled: true
         record-exceptions:
           - com.logistics.routing.domain.route.exception.RoutingEngineException
+    instances:
+      osrm-truck:
+        baseConfig: osrm
+      osrm-train:
+        baseConfig: osrm
+      osrm-vessel:
+        baseConfig: osrm
