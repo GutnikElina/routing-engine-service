@@ -7,15 +7,17 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import com.logistics.routing.domain.route.exception.RouteSegmentationException;
 import com.logistics.routing.domain.route.model.enums.TransportType;
 
 @Getter
 public class RouteSegment {
-    private final UUID id;
+    private UUID id;
     private final Integer segmentIndex;
     private final TransportType transportType;
     private final List<Waypoint> waypoints;
 
+    // Null until a schedule is computed for the route (mirrors RouteOrder.totalDistanceKm/eta).
     private final Instant plannedStartTime;
     private final Instant plannedEndTime;
     private Instant actualStartTime;
@@ -31,12 +33,15 @@ public class RouteSegment {
         Instant actualStartTime,
         Instant actualEndTime
     ) {
-        this.id = Objects.requireNonNull(id, "id must not be null");
+        this.id = id;
         this.segmentIndex = Objects.requireNonNull(segmentIndex, "segmentIndex must not be null");
         this.transportType = Objects.requireNonNull(transportType, "transportType must not be null");
         this.waypoints = List.copyOf(Objects.requireNonNull(waypoints, "waypoints must not be null"));
-        this.plannedStartTime = Objects.requireNonNull(plannedStartTime, "plannedStartTime must not be null");
-        this.plannedEndTime = Objects.requireNonNull(plannedEndTime, "plannedEndTime must not be null");
+        if (this.waypoints.size() < 2) {
+            throw new RouteSegmentationException("a route segment must span at least two waypoints");
+        }
+        this.plannedStartTime = plannedStartTime;
+        this.plannedEndTime = plannedEndTime;
         this.actualStartTime = actualStartTime;
         this.actualEndTime = actualEndTime;
     }

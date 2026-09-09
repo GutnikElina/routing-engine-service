@@ -47,6 +47,7 @@ class RoutingEngineApplicationTests {
                 String.class);
 
         assertThat(tables)
-                .contains("route_orders", "route_segments", "waypoints", "route_segment_waypoints", "outbox_events");
+                .contains("route_orders", "route_segments", "waypoints", "route_segment_waypoints", "outbox_events",
+                        "geofence_zones");
     }
 }
