@@ -23,6 +23,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
 import java.net.SocketTimeoutException;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.logistics.routing.testdata.OsrmTestData.coordinate;
@@ -120,6 +121,18 @@ class OsrmRoutingClientTest {
 
             assertThat(result.distancesMeters().get(0).get(1)).isPositive();
             assertThat(result.durationsSeconds().get(0).get(1)).isPositive();
+        }
+
+        @Test
+        void shouldThrowRoutingEngineExceptionWhenTableContainsNullCell() {
+            mockTableSuccess(okTableResponse(
+                    List.of(Arrays.asList(0.0, null), List.of(5000.0, 0.0)),
+                    List.of(List.of(0.0, 5000.0), List.of(5000.0, 0.0))));
+
+            assertThatThrownBy(() -> client.getDistanceMatrix(
+                    List.of(coordinate(55, 37), coordinate(56, 38))))
+                    .isInstanceOf(RoutingEngineException.class)
+                    .hasMessage("OSRM table response contains null values in durations");
         }
 
         @Test

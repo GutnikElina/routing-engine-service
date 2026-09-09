@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @UtilityClass
@@ -24,6 +25,8 @@ public class OsrmResponseMapper {
         if (response.durations() == null || response.distances() == null) {
             throw new RoutingEngineException("OSRM table response is missing durations or distances");
         }
+        assertMatrixHasNoNulls(response.durations(), "durations");
+        assertMatrixHasNoNulls(response.distances(), "distances");
 
         return new DistanceMatrix(
                 OsrmNumberConverter.toBigDecimalMatrix(response.durations()),
@@ -74,6 +77,12 @@ public class OsrmResponseMapper {
 
     private BigDecimal toBigDecimalOrZero(Double value) {
         return value == null ? BigDecimal.ZERO : BigDecimal.valueOf(value);
+    }
+
+    private void assertMatrixHasNoNulls(List<List<Double>> matrix, String matrixName) {
+        if (matrix.stream().anyMatch(row -> row == null || row.stream().anyMatch(Objects::isNull))) {
+            throw new RoutingEngineException("OSRM table response contains null values in " + matrixName);
+        }
     }
 
     private void assertOkResponse(String code, String message) {
